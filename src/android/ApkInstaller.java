@@ -24,8 +24,8 @@ public class ApkInstaller extends CordovaPlugin {
             String path = data.getString(0);
             String fileName = data.getString(1);
             Context context = this.cordova.getActivity().getApplicationContext();
+            // TODO: use baseDir as default when user doesn't specify a path
             String baseDir = Environment.getExternalStorageDirectory().getAbsolutePath();
-           // File file = new File(baseDir + "/Android/data/at.workflow.webdesk.mobile.kiosk/files/" + fileName);
             File file = new File(path + fileName);
 
             try {
@@ -47,16 +47,22 @@ public class ApkInstaller extends CordovaPlugin {
         }
     }
     
+    /*
+     * Api up to 23 uses file:// based URIs to create the intent
+     */
     private void oldInstall (File file, Context context){
-        Uri uri = Uri.fromFile(file); // file://
+                Uri uri = Uri.fromFile(file);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, MIME_TYPE_APK);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
+    /*
+    * Api 24 onwards uses context:// based URIs to create the intent
+    */
     private void install (File file, Context context){
-        Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file); // context://
+        Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, MIME_TYPE_APK);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
